@@ -1,0 +1,56 @@
+.todo-input {
+  display: flex;
+  gap: 8px;
+  padding: 16px;
+}
+
+.todo-input-field {
+  flex: 1;
+  padding: 12px 16px;
+  font-size: 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.todo-input-field:focus {
+  border-color: #667eea;
+}
+
+.todo-input-field::placeholder {
+  color: #999;
+}
+
+.todo-input-btn {
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  color: white;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.1s;
+}
+
+.todo-input-btn:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.todo-input-btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.todo-input-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.preview-container {
+  max-width: 500px;
+  margin: 24px auto;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
