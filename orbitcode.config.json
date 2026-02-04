@@ -1,0 +1,7 @@
+{
+  "name": "Todo List",
+  "description": "Simple tasks app with filters and inline editing",
+  "icon": "✅",
+  "defaultTheme": "light",
+  "defaultLayout": "sidebyside"
+}
