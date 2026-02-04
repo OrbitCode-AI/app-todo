@@ -3,6 +3,7 @@ import './styles.css';
 
 interface TodoHeaderProps {
   title?: string;
+  floatingTitle?: boolean;
   value?: string;
   placeholder?: string;
   disabled?: boolean;
@@ -15,6 +16,7 @@ const noopValueChange = (_value: string) => {};
 
 export default function TodoHeader({
   title = 'todos',
+  floatingTitle = false,
   value = '',
   placeholder = 'What needs to be done?',
   disabled = false,
@@ -23,7 +25,7 @@ export default function TodoHeader({
 }: TodoHeaderProps = {}) {
   return (
     <header className="header">
-      <TodoTitle text={title} />
+      <TodoTitle text={title} floating={floatingTitle} />
       <form onSubmit={onSubmit}>
         <input
           className="new-todo"

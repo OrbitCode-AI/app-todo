@@ -38,7 +38,7 @@ export default function TodoItem({
   onCancelEdit = noopCancelEdit,
 }: TodoItemProps = {}) {
   return (
-    <li className={`${todo.completed ? 'completed' : ''} ${isEditing ? 'editing' : ''}`}>
+    <li className={`todo-item ${todo.completed ? 'completed' : ''} ${isEditing ? 'editing' : ''}`}>
       <div className="view">
         <input
           className="toggle"

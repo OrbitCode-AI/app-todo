@@ -100,7 +100,13 @@ export default function App() {
   return (
     <>
       <section className="todoapp">
-        <TodoHeader value={input} onValueChange={setInput} onSubmit={handleAdd} disabled={isAdding} />
+        <TodoHeader
+          floatingTitle
+          value={input}
+          onValueChange={setInput}
+          onSubmit={handleAdd}
+          disabled={isAdding}
+        />
 
         {loading ? (
           <section className="main">
