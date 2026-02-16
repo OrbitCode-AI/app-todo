@@ -1,4 +1,4 @@
-import { useVar, useSet } from 'orbitcode';
+import { useList, useVar } from 'orbitcode';
 import { useRef, useState } from 'preact/hooks';
 
 import TodoHeader from './TodoHeader';
@@ -15,7 +15,7 @@ function matchesFilter(todo: Todo, filter: TodoFilter): boolean {
 }
 
 export default function App() {
-  const [todos, { add, update, remove }, loading] = useSet<TodoRecord>('todos');
+  const [todos, { add, update, remove }, loading] = useList<TodoRecord>('todos');
   const [input, setInput] = useVar('newTodo', '');
   const [filter, setFilter] = useVar<TodoFilter>('filter', 'all');
 

@@ -1,4 +1,4 @@
-import { useSet, useVar } from 'orbitcode';
+import { useList, useVar } from 'orbitcode';
 import { useEffect, useRef } from 'preact/hooks';
 
 import TodoItem from './TodoItem';
@@ -47,7 +47,7 @@ export default function TodoList({
 }: TodoListProps = {}) {
   // Standalone storyboard mode: when no todos are passed in, keep a tiny
   // persistent sample collection so previews behave like a real app.
-  const [previewTodos, previewActions, previewLoading] = useSet<TodoRecord>('todoListPreviewItems');
+  const [previewTodos, previewActions, previewLoading] = useList<TodoRecord>('todoListPreviewItems');
   const [previewSeeded, setPreviewSeeded] = useVar('todoListPreviewSeeded', false);
   const seedingRef = useRef(false);
 
