@@ -70,7 +70,6 @@ export default function TodoItem({
               onCancelEdit();
             }
           }}
-          autoFocus
         />
       )}
     </li>

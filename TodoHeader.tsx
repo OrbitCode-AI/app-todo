@@ -33,7 +33,6 @@ export default function TodoHeader({
           value={value}
           onInput={(event) => onValueChange((event.target as HTMLInputElement).value)}
           disabled={disabled}
-          autoFocus
         />
       </form>
     </header>
