@@ -1,30 +1,30 @@
-import type { Todo } from './types';
-import './styles.css';
+import type { Todo } from './types'
+import './styles.css'
 
 interface TodoItemProps {
-  todo?: Todo;
-  isEditing?: boolean;
-  editText?: string;
-  onToggle?: (todo: Todo) => void;
-  onDestroy?: (id: string) => void;
-  onStartEditing?: (todo: Todo) => void;
-  onEditTextChange?: (value: string) => void;
-  onSubmitEdit?: (id: string) => void;
-  onCancelEdit?: () => void;
+  todo?: Todo
+  isEditing?: boolean
+  editText?: string
+  onToggle?: (todo: Todo) => void
+  onDestroy?: (id: string) => void
+  onStartEditing?: (todo: Todo) => void
+  onEditTextChange?: (value: string) => void
+  onSubmitEdit?: (id: string) => void
+  onCancelEdit?: () => void
 }
 
 const SAMPLE_TODO: Todo = {
   id: 'sample-item',
   text: 'Tastefully composed todo item',
   completed: false,
-};
+}
 
-const noopToggle = (_todo: Todo) => {};
-const noopDestroy = (_id: string) => {};
-const noopStartEditing = (_todo: Todo) => {};
-const noopEditTextChange = (_value: string) => {};
-const noopSubmitEdit = (_id: string) => {};
-const noopCancelEdit = () => {};
+const noopToggle = (_todo: Todo) => {}
+const noopDestroy = (_id: string) => {}
+const noopStartEditing = (_todo: Todo) => {}
+const noopEditTextChange = (_value: string) => {}
+const noopSubmitEdit = (_id: string) => {}
+const noopCancelEdit = () => {}
 
 export default function TodoItem({
   todo = SAMPLE_TODO,
@@ -59,19 +59,19 @@ export default function TodoItem({
         <input
           className="edit"
           value={editText}
-          onInput={(event) => onEditTextChange((event.target as HTMLInputElement).value)}
+          onInput={event => onEditTextChange((event.target as HTMLInputElement).value)}
           onBlur={() => onSubmitEdit(todo.id)}
-          onKeyDown={(event) => {
+          onKeyDown={event => {
             if (event.key === 'Enter') {
-              event.preventDefault();
-              onSubmitEdit(todo.id);
+              event.preventDefault()
+              onSubmitEdit(todo.id)
             } else if (event.key === 'Escape') {
-              event.preventDefault();
-              onCancelEdit();
+              event.preventDefault()
+              onCancelEdit()
             }
           }}
         />
       )}
     </li>
-  );
+  )
 }

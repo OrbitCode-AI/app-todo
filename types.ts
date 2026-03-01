@@ -1,8 +1,8 @@
 export interface TodoRecord {
-  text: string;
-  completed: boolean;
+  text: string
+  completed: boolean
 }
 
-export type Todo = TodoRecord & { id: string };
+export type Todo = TodoRecord & { id: string }
 
-export type TodoFilter = 'all' | 'active' | 'completed';
+export type TodoFilter = 'all' | 'active' | 'completed'

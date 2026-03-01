@@ -1,10 +1,10 @@
-import './styles.css';
+import './styles.css'
 
 interface TodoTitleProps {
-  text?: string;
-  floating?: boolean;
+  text?: string
+  floating?: boolean
 }
 
 export default function TodoTitle({ text = 'todos', floating = false }: TodoTitleProps = {}) {
-  return <h1 className={`todo-title${floating ? ' todo-title-floating' : ''}`}>{text}</h1>;
+  return <h1 className={`todo-title${floating ? ' todo-title-floating' : ''}`}>{text}</h1>
 }

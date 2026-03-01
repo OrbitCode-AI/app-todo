@@ -1,36 +1,36 @@
-import { useList, useVar } from 'orbitcode';
-import { useEffect, useRef } from 'preact/hooks';
+import { useList, useVar } from 'orbitcode'
+import { useEffect, useRef } from 'preact/hooks'
 
-import TodoItem from './TodoItem';
-import type { Todo, TodoRecord } from './types';
-import './styles.css';
+import TodoItem from './TodoItem'
+import type { Todo, TodoRecord } from './types'
+import './styles.css'
 
 interface TodoListProps {
-  todos?: Todo[];
-  allCompleted?: boolean;
-  editingId?: string | null;
-  editText?: string;
-  onToggleAll?: () => void;
-  onToggle?: (todo: Todo) => void;
-  onDestroy?: (id: string) => void;
-  onStartEditing?: (todo: Todo) => void;
-  onEditTextChange?: (value: string) => void;
-  onSubmitEdit?: (id: string) => void;
-  onCancelEdit?: () => void;
+  todos?: Todo[]
+  allCompleted?: boolean
+  editingId?: string | null
+  editText?: string
+  onToggleAll?: () => void
+  onToggle?: (todo: Todo) => void
+  onDestroy?: (id: string) => void
+  onStartEditing?: (todo: Todo) => void
+  onEditTextChange?: (value: string) => void
+  onSubmitEdit?: (id: string) => void
+  onCancelEdit?: () => void
 }
 
 const SAMPLE_TODOS: Todo[] = [
   { id: 'sample-1', text: 'Write concise, beautiful components', completed: false },
   { id: 'sample-2', text: 'Break UI into visual blocks', completed: true },
   { id: 'sample-3', text: 'Ship with confidence', completed: false },
-];
+]
 
-const noop = () => {};
-const noopToggle = (_todo: Todo) => {};
-const noopDestroy = (_id: string) => {};
-const noopStartEditing = (_todo: Todo) => {};
-const noopEditTextChange = (_value: string) => {};
-const noopSubmitEdit = (_id: string) => {};
+const noop = () => {}
+const noopToggle = (_todo: Todo) => {}
+const noopDestroy = (_id: string) => {}
+const noopStartEditing = (_todo: Todo) => {}
+const noopEditTextChange = (_value: string) => {}
+const noopSubmitEdit = (_id: string) => {}
 
 export default function TodoList({
   todos,
@@ -47,29 +47,35 @@ export default function TodoList({
 }: TodoListProps = {}) {
   // Standalone storyboard mode: when no todos are passed in, keep a tiny
   // persistent sample collection so previews behave like a real app.
-  const [previewTodos, previewActions, previewLoading] = useList<TodoRecord>('todoListPreviewItems');
-  const [previewSeeded, setPreviewSeeded] = useVar('todoListPreviewSeeded', false);
-  const seedingRef = useRef(false);
+  const [previewTodos, previewActions, previewLoading] = useList<TodoRecord>('todoListPreviewItems')
+  const [previewSeeded, setPreviewSeeded] = useVar('todoListPreviewSeeded', false)
+  const seedingRef = useRef(false)
 
-  const isControlled = typeof todos !== 'undefined';
-  const visibleTodos = isControlled ? todos : previewTodos;
+  const isControlled = typeof todos !== 'undefined'
+  const visibleTodos = isControlled ? todos : previewTodos
 
   useEffect(() => {
-    if (isControlled || previewLoading || previewSeeded || previewTodos.length > 0 || seedingRef.current)
-      return;
+    if (
+      isControlled ||
+      previewLoading ||
+      previewSeeded ||
+      previewTodos.length > 0 ||
+      seedingRef.current
+    )
+      return
 
-    seedingRef.current = true;
+    seedingRef.current = true
 
-    (async () => {
+    ;(async () => {
       try {
         for (const sample of SAMPLE_TODOS) {
-          await previewActions.add({ text: sample.text, completed: sample.completed });
+          await previewActions.add({ text: sample.text, completed: sample.completed })
         }
-        setPreviewSeeded(true);
+        setPreviewSeeded(true)
       } finally {
-        seedingRef.current = false;
+        seedingRef.current = false
       }
-    })();
+    })()
   }, [
     isControlled,
     previewLoading,
@@ -77,33 +83,33 @@ export default function TodoList({
     previewTodos.length,
     previewActions,
     setPreviewSeeded,
-  ]);
+  ])
 
   const derivedAllCompleted =
-    visibleTodos.length > 0 && visibleTodos.every((todo) => todo.completed === true);
+    visibleTodos.length > 0 && visibleTodos.every(todo => todo.completed === true)
 
   const handleToggleAll = isControlled
     ? onToggleAll
     : () => {
-        const nextCompleted = !derivedAllCompleted;
+        const nextCompleted = !derivedAllCompleted
         for (const todo of visibleTodos) {
           if (todo.completed !== nextCompleted) {
-            previewActions.update(todo.id, { text: todo.text, completed: nextCompleted });
+            previewActions.update(todo.id, { text: todo.text, completed: nextCompleted })
           }
         }
-      };
+      }
 
   const handleToggle = isControlled
     ? onToggle
     : (todo: Todo) => {
-        previewActions.update(todo.id, { text: todo.text, completed: !todo.completed });
-      };
+        previewActions.update(todo.id, { text: todo.text, completed: !todo.completed })
+      }
 
   const handleDestroy = isControlled
     ? onDestroy
     : (id: string) => {
-        previewActions.remove(id);
-      };
+        previewActions.remove(id)
+      }
 
   if (previewLoading && !isControlled) {
     return (
@@ -112,7 +118,7 @@ export default function TodoList({
           <li className="loading">Loading...</li>
         </ul>
       </section>
-    );
+    )
   }
 
   if (visibleTodos.length === 0) {
@@ -122,7 +128,7 @@ export default function TodoList({
           <li className="loading">No todos yet.</li>
         </ul>
       </section>
-    );
+    )
   }
 
   return (
@@ -137,7 +143,7 @@ export default function TodoList({
       <label htmlFor="toggle-all">Mark all as complete</label>
 
       <ul className="todo-list">
-        {visibleTodos.map((todo) => (
+        {visibleTodos.map(todo => (
           <TodoItem
             key={todo.id}
             todo={todo}
@@ -153,5 +159,5 @@ export default function TodoList({
         ))}
       </ul>
     </section>
-  );
+  )
 }

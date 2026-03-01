@@ -1,22 +1,22 @@
-import type { TodoFilter } from './types';
-import './styles.css';
+import type { TodoFilter } from './types'
+import './styles.css'
 
 interface TodoFooterProps {
-  activeCount?: number;
-  completedCount?: number;
-  filter?: TodoFilter;
-  onFilterChange?: (filter: TodoFilter) => void;
-  onClearCompleted?: () => void;
+  activeCount?: number
+  completedCount?: number
+  filter?: TodoFilter
+  onFilterChange?: (filter: TodoFilter) => void
+  onClearCompleted?: () => void
 }
 
 const FILTERS: Array<{ value: TodoFilter; label: string; href: string }> = [
   { value: 'all', label: 'All', href: '#/' },
   { value: 'active', label: 'Active', href: '#/active' },
   { value: 'completed', label: 'Completed', href: '#/completed' },
-];
+]
 
-const noopFilterChange = (_filter: TodoFilter) => {};
-const noopClearCompleted = () => {};
+const noopFilterChange = (_filter: TodoFilter) => {}
+const noopClearCompleted = () => {}
 
 export default function TodoFooter({
   activeCount = 2,
@@ -32,16 +32,15 @@ export default function TodoFooter({
       </span>
 
       <ul className="filters">
-        {FILTERS.map((entry) => (
+        {FILTERS.map(entry => (
           <li key={entry.value}>
             <a
               href={entry.href}
               className={filter === entry.value ? 'selected' : ''}
-              onClick={(event) => {
-                event.preventDefault();
-                onFilterChange(entry.value);
-              }}
-            >
+              onClick={event => {
+                event.preventDefault()
+                onFilterChange(entry.value)
+              }}>
               {entry.label}
             </a>
           </li>
@@ -54,5 +53,5 @@ export default function TodoFooter({
         </button>
       )}
     </footer>
-  );
+  )
 }
