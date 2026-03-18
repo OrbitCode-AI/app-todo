@@ -7,35 +7,37 @@ import './styles.css'
 
 interface TodoListProps {
   todos?: Todo[]
+  todosAll?: Todo[]
   allCompleted?: boolean
-  editingId?: string | null
+  editingIndex?: number | null
   editText?: string
   onToggleAll?: () => void
   onToggle?: (todo: Todo) => void
-  onDestroy?: (id: string) => void
+  onDestroy?: (index: number) => void
   onStartEditing?: (todo: Todo) => void
   onEditTextChange?: (value: string) => void
-  onSubmitEdit?: (id: string) => void
+  onSubmitEdit?: (index: number) => void
   onCancelEdit?: () => void
 }
 
-const SAMPLE_TODOS: Todo[] = [
-  { id: 'sample-1', text: 'Write concise, beautiful components', completed: false },
-  { id: 'sample-2', text: 'Break UI into visual blocks', completed: true },
-  { id: 'sample-3', text: 'Ship with confidence', completed: false },
-]
+const SAMPLE_TODOS = [
+  { text: 'Write concise, beautiful components', completed: false },
+  { text: 'Break UI into visual blocks', completed: true },
+  { text: 'Ship with confidence', completed: false },
+] as Todo[]
 
 const noop = () => {}
 const noopToggle = (_todo: Todo) => {}
-const noopDestroy = (_id: string) => {}
+const noopDestroy = (_index: number) => {}
 const noopStartEditing = (_todo: Todo) => {}
 const noopEditTextChange = (_value: string) => {}
-const noopSubmitEdit = (_id: string) => {}
+const noopSubmitEdit = (_index: number) => {}
 
 export default function TodoList({
   todos,
+  todosAll,
   allCompleted = false,
-  editingId = null,
+  editingIndex = null,
   editText = '',
   onToggleAll = noop,
   onToggle = noopToggle,
@@ -53,6 +55,7 @@ export default function TodoList({
 
   const isControlled = typeof todos !== 'undefined'
   const visibleTodos = isControlled ? todos : previewTodos
+  const allTodos = isControlled ? todosAll || todos : previewTodos
 
   useEffect(() => {
     if (
@@ -69,7 +72,7 @@ export default function TodoList({
     ;(async () => {
       try {
         for (const sample of SAMPLE_TODOS) {
-          await previewActions.add({ text: sample.text, completed: sample.completed })
+          await previewActions.push({ text: sample.text, completed: sample.completed })
         }
         setPreviewSeeded(true)
       } finally {
@@ -92,23 +95,22 @@ export default function TodoList({
     ? onToggleAll
     : () => {
         const nextCompleted = !derivedAllCompleted
-        for (const todo of visibleTodos) {
-          if (todo.completed !== nextCompleted) {
-            previewActions.update(todo.id, { text: todo.text, completed: nextCompleted })
-          }
-        }
+        previewActions.set(
+          previewTodos.map(todo => ({ text: todo.text, completed: nextCompleted })),
+        )
       }
 
   const handleToggle = isControlled
     ? onToggle
     : (todo: Todo) => {
-        previewActions.update(todo.id, { text: todo.text, completed: !todo.completed })
+        const index = allTodos.indexOf(todo)
+        previewActions.updateAt(index, { text: todo.text, completed: !todo.completed })
       }
 
   const handleDestroy = isControlled
     ? onDestroy
-    : (id: string) => {
-        previewActions.remove(id)
+    : (index: number) => {
+        previewActions.removeAt(index)
       }
 
   if (previewLoading && !isControlled) {
@@ -143,20 +145,24 @@ export default function TodoList({
       <label htmlFor="toggle-all">Mark all as complete</label>
 
       <ul className="todo-list">
-        {visibleTodos.map(todo => (
-          <TodoItem
-            key={todo.id}
-            todo={todo}
-            isEditing={editingId === todo.id}
-            editText={editingId === todo.id ? editText : todo.text}
-            onToggle={handleToggle}
-            onDestroy={handleDestroy}
-            onStartEditing={onStartEditing}
-            onEditTextChange={onEditTextChange}
-            onSubmitEdit={onSubmitEdit}
-            onCancelEdit={onCancelEdit}
-          />
-        ))}
+        {visibleTodos.map(todo => {
+          const index = allTodos.indexOf(todo)
+          return (
+            <TodoItem
+              key={index}
+              todo={todo}
+              index={index}
+              isEditing={editingIndex === index}
+              editText={editingIndex === index ? editText : todo.text}
+              onToggle={handleToggle}
+              onDestroy={handleDestroy}
+              onStartEditing={onStartEditing}
+              onEditTextChange={onEditTextChange}
+              onSubmitEdit={onSubmitEdit}
+              onCancelEdit={onCancelEdit}
+            />
+          )
+        })}
       </ul>
     </section>
   )

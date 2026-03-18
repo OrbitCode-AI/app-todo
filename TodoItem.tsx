@@ -3,31 +3,32 @@ import './styles.css'
 
 interface TodoItemProps {
   todo?: Todo
+  index?: number
   isEditing?: boolean
   editText?: string
   onToggle?: (todo: Todo) => void
-  onDestroy?: (id: string) => void
+  onDestroy?: (index: number) => void
   onStartEditing?: (todo: Todo) => void
   onEditTextChange?: (value: string) => void
-  onSubmitEdit?: (id: string) => void
+  onSubmitEdit?: (index: number) => void
   onCancelEdit?: () => void
 }
 
-const SAMPLE_TODO: Todo = {
-  id: 'sample-item',
+const SAMPLE_TODO = {
   text: 'Tastefully composed todo item',
   completed: false,
-}
+} as Todo
 
 const noopToggle = (_todo: Todo) => {}
-const noopDestroy = (_id: string) => {}
+const noopDestroy = (_index: number) => {}
 const noopStartEditing = (_todo: Todo) => {}
 const noopEditTextChange = (_value: string) => {}
-const noopSubmitEdit = (_id: string) => {}
+const noopSubmitEdit = (_index: number) => {}
 const noopCancelEdit = () => {}
 
 export default function TodoItem({
   todo = SAMPLE_TODO,
+  index = 0,
   isEditing = false,
   editText = SAMPLE_TODO.text,
   onToggle = noopToggle,
@@ -50,7 +51,7 @@ export default function TodoItem({
         <button
           type="button"
           className="destroy"
-          onClick={() => onDestroy(todo.id)}
+          onClick={() => onDestroy(index)}
           aria-label="Delete todo"
         />
       </div>
@@ -60,11 +61,11 @@ export default function TodoItem({
           className="edit"
           value={editText}
           onInput={event => onEditTextChange((event.target as HTMLInputElement).value)}
-          onBlur={() => onSubmitEdit(todo.id)}
+          onBlur={() => onSubmitEdit(index)}
           onKeyDown={event => {
             if (event.key === 'Enter') {
               event.preventDefault()
-              onSubmitEdit(todo.id)
+              onSubmitEdit(index)
             } else if (event.key === 'Escape') {
               event.preventDefault()
               onCancelEdit()

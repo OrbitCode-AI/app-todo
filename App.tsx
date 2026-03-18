@@ -15,28 +15,31 @@ function matchesFilter(todo: Todo, filter: TodoFilter): boolean {
 }
 
 export default function App() {
-  const [todos, { add, update, remove }, loading] = useList<TodoRecord>('todos')
+  const [todos, actions, loading] = useList<TodoRecord>('todos')
   const [input, setInput] = useVar('newTodo', '')
   const [filter, setFilter] = useVar<TodoFilter>('filter', 'all')
 
-  const [editingId, setEditingId] = useState<string | null>(null)
+  const [editingIndex, setEditingIndex] = useState<number | null>(null)
   const [editText, setEditText] = useState('')
   const [isAdding, setIsAdding] = useState(false)
 
-  const activeEditIdRef = useRef<string | null>(null)
+  const activeEditRef = useRef<number | null>(null)
 
   const activeCount = todos.filter(todo => !todo.completed).length
   const completedCount = todos.length - activeCount
   const allCompleted = todos.length > 0 && activeCount === 0
   const filteredTodos = todos.filter(todo => matchesFilter(todo, filter))
 
-  const setEditingState = (id: string | null, text = '') => {
-    activeEditIdRef.current = id
-    setEditingId(id)
+  const setEditingState = (index: number | null, text = '') => {
+    activeEditRef.current = index
+    setEditingIndex(index)
     setEditText(text)
   }
 
-  const startEditing = (todo: Todo) => setEditingState(todo.id, todo.text)
+  const startEditing = (todo: Todo) => {
+    const index = todos.indexOf(todo)
+    setEditingState(index, todo.text)
+  }
   const cancelEditing = () => setEditingState(null, '')
 
   const handleAdd = async (event: Event) => {
@@ -49,7 +52,7 @@ export default function App() {
     setInput('')
     setIsAdding(true)
     try {
-      await add({ text, completed: false })
+      await actions.push({ text, completed: false })
     } finally {
       setIsAdding(false)
     }
@@ -57,43 +60,38 @@ export default function App() {
 
   const handleToggleAll = () => {
     const nextCompleted = !allCompleted
-    for (const todo of todos) {
-      if (todo.completed !== nextCompleted) {
-        update(todo.id, { text: todo.text, completed: nextCompleted })
-      }
-    }
+    actions.set(todos.map(todo => ({ text: todo.text, completed: nextCompleted })))
   }
 
   const handleToggle = (todo: Todo) => {
-    update(todo.id, { text: todo.text, completed: !todo.completed })
+    const index = todos.indexOf(todo)
+    actions.updateAt(index, { text: todo.text, completed: !todo.completed })
   }
 
-  const handleDestroy = (id: string) => {
-    if (editingId === id) cancelEditing()
-    remove(id)
+  const handleDestroy = (index: number) => {
+    if (editingIndex === index) cancelEditing()
+    actions.removeAt(index)
   }
 
   const handleClearCompleted = () => {
-    for (const todo of todos) {
-      if (todo.completed) remove(todo.id)
-    }
+    actions.set(todos.filter(t => !t.completed).map(({ text, completed }) => ({ text, completed })))
   }
 
-  const handleSubmitEdit = (id: string) => {
+  const handleSubmitEdit = (index: number) => {
     // Enter and blur may fire back-to-back; only honor the first one.
-    if (activeEditIdRef.current !== id) return
+    if (activeEditRef.current !== index) return
 
-    const todo = todos.find(entry => entry.id === id)
+    const todo = todos[index]
     const nextText = editText.trim()
     cancelEditing()
 
     if (!todo) return
     if (!nextText) {
-      remove(id)
+      actions.removeAt(index)
       return
     }
     if (nextText !== todo.text) {
-      update(id, { text: nextText, completed: todo.completed })
+      actions.updateAt(index, { text: nextText, completed: todo.completed })
     }
   }
 
@@ -119,8 +117,9 @@ export default function App() {
             <>
               <TodoList
                 todos={filteredTodos}
+                todosAll={todos}
                 allCompleted={allCompleted}
-                editingId={editingId}
+                editingIndex={editingIndex}
                 editText={editText}
                 onToggleAll={handleToggleAll}
                 onToggle={handleToggle}
