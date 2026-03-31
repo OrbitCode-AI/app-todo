@@ -1,4 +1,4 @@
-import { useList, useVar } from 'orbitcode'
+import { useMap, useVar } from 'orbitcode'
 import { useRef, useState } from 'preact/hooks'
 
 import TodoHeader from './TodoHeader'
@@ -15,30 +15,31 @@ function matchesFilter(todo: Todo, filter: TodoFilter): boolean {
 }
 
 export default function App() {
-  const [todos, actions, loading] = useList<TodoRecord>('todos')
+  const [todosMap, actions, loading] = useMap<TodoRecord>('todos')
   const [input, setInput] = useVar('newTodo', '')
   const [filter, setFilter] = useVar<TodoFilter>('filter', 'all')
 
-  const [editingIndex, setEditingIndex] = useState<number | null>(null)
+  const [editingId, setEditingId] = useState<string | null>(null)
   const [editText, setEditText] = useState('')
   const [isAdding, setIsAdding] = useState(false)
 
-  const activeEditRef = useRef<number | null>(null)
+  const activeEditRef = useRef<string | null>(null)
+
+  const todos: Todo[] = Object.entries(todosMap).map(([id, rec]) => ({ ...rec, id }))
 
   const activeCount = todos.filter(todo => !todo.completed).length
   const completedCount = todos.length - activeCount
   const allCompleted = todos.length > 0 && activeCount === 0
   const filteredTodos = todos.filter(todo => matchesFilter(todo, filter))
 
-  const setEditingState = (index: number | null, text = '') => {
-    activeEditRef.current = index
-    setEditingIndex(index)
+  const setEditingState = (id: string | null, text = '') => {
+    activeEditRef.current = id
+    setEditingId(id)
     setEditText(text)
   }
 
   const startEditing = (todo: Todo) => {
-    const index = todos.indexOf(todo)
-    setEditingState(index, todo.text)
+    setEditingState(todo.id, todo.text)
   }
   const cancelEditing = () => setEditingState(null, '')
 
@@ -52,7 +53,7 @@ export default function App() {
     setInput('')
     setIsAdding(true)
     try {
-      await actions.push({ text, completed: false })
+      await actions.set(Date.now().toString(), { text, completed: false })
     } finally {
       setIsAdding(false)
     }
@@ -60,38 +61,43 @@ export default function App() {
 
   const handleToggleAll = () => {
     const nextCompleted = !allCompleted
-    actions.set(todos.map(todo => ({ text: todo.text, completed: nextCompleted })))
+    for (const todo of todos) {
+      actions.set(todo.id, { text: todo.text, completed: nextCompleted })
+    }
   }
 
   const handleToggle = (todo: Todo) => {
-    const index = todos.indexOf(todo)
-    actions.updateAt(index, { text: todo.text, completed: !todo.completed })
+    actions.set(todo.id, { text: todo.text, completed: !todo.completed })
   }
 
-  const handleDestroy = (index: number) => {
-    if (editingIndex === index) cancelEditing()
-    actions.removeAt(index)
+  const handleDestroy = (id: string) => {
+    if (editingId === id) cancelEditing()
+    actions.remove(id)
   }
 
   const handleClearCompleted = () => {
-    actions.set(todos.filter(t => !t.completed).map(({ text, completed }) => ({ text, completed })))
+    for (const todo of todos) {
+      if (todo.completed) {
+        actions.remove(todo.id)
+      }
+    }
   }
 
-  const handleSubmitEdit = (index: number) => {
+  const handleSubmitEdit = (id: string) => {
     // Enter and blur may fire back-to-back; only honor the first one.
-    if (activeEditRef.current !== index) return
+    if (activeEditRef.current !== id) return
 
-    const todo = todos[index]
+    const todo = todos.find(t => t.id === id)
     const nextText = editText.trim()
     cancelEditing()
 
     if (!todo) return
     if (!nextText) {
-      actions.removeAt(index)
+      actions.remove(id)
       return
     }
     if (nextText !== todo.text) {
-      actions.updateAt(index, { text: nextText, completed: todo.completed })
+      actions.set(id, { text: nextText, completed: todo.completed })
     }
   }
 
@@ -119,7 +125,7 @@ export default function App() {
                 todos={filteredTodos}
                 todosAll={todos}
                 allCompleted={allCompleted}
-                editingIndex={editingIndex}
+                editingId={editingId}
                 editText={editText}
                 onToggleAll={handleToggleAll}
                 onToggle={handleToggle}

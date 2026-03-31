@@ -1,4 +1,4 @@
-import { useList, useVar } from 'orbitcode'
+import { useMap, useVar } from 'orbitcode'
 import { useEffect, useRef } from 'preact/hooks'
 
 import TodoItem from './TodoItem'
@@ -9,14 +9,14 @@ interface TodoListProps {
   todos?: Todo[]
   todosAll?: Todo[]
   allCompleted?: boolean
-  editingIndex?: number | null
+  editingId?: string | null
   editText?: string
   onToggleAll?: () => void
   onToggle?: (todo: Todo) => void
-  onDestroy?: (index: number) => void
+  onDestroy?: (id: string) => void
   onStartEditing?: (todo: Todo) => void
   onEditTextChange?: (value: string) => void
-  onSubmitEdit?: (index: number) => void
+  onSubmitEdit?: (id: string) => void
   onCancelEdit?: () => void
 }
 
@@ -28,16 +28,16 @@ const SAMPLE_TODOS = [
 
 const noop = () => {}
 const noopToggle = (_todo: Todo) => {}
-const noopDestroy = (_index: number) => {}
+const noopDestroy = (_id: string) => {}
 const noopStartEditing = (_todo: Todo) => {}
 const noopEditTextChange = (_value: string) => {}
-const noopSubmitEdit = (_index: number) => {}
+const noopSubmitEdit = (_id: string) => {}
 
 export default function TodoList({
   todos,
   todosAll,
   allCompleted = false,
-  editingIndex = null,
+  editingId = null,
   editText = '',
   onToggleAll = noop,
   onToggle = noopToggle,
@@ -49,9 +49,11 @@ export default function TodoList({
 }: TodoListProps = {}) {
   // Standalone storyboard mode: when no todos are passed in, keep a tiny
   // persistent sample collection so previews behave like a real app.
-  const [previewTodos, previewActions, previewLoading] = useList<TodoRecord>('todoListPreviewItems')
+  const [previewMap, previewActions, previewLoading] = useMap<TodoRecord>('todoListPreviewItems')
   const [previewSeeded, setPreviewSeeded] = useVar('todoListPreviewSeeded', false)
   const seedingRef = useRef(false)
+
+  const previewTodos: Todo[] = Object.entries(previewMap).map(([id, rec]) => ({ ...rec, id }))
 
   const isControlled = typeof todos !== 'undefined'
   const visibleTodos = isControlled ? todos : previewTodos
@@ -72,7 +74,7 @@ export default function TodoList({
     ;(async () => {
       try {
         for (const sample of SAMPLE_TODOS) {
-          await previewActions.push({ text: sample.text, completed: sample.completed })
+          await previewActions.set(Date.now().toString(), { text: sample.text, completed: sample.completed })
         }
         setPreviewSeeded(true)
       } finally {
@@ -95,22 +97,21 @@ export default function TodoList({
     ? onToggleAll
     : () => {
         const nextCompleted = !derivedAllCompleted
-        previewActions.set(
-          previewTodos.map(todo => ({ text: todo.text, completed: nextCompleted })),
-        )
+        for (const todo of previewTodos) {
+          previewActions.set(todo.id, { text: todo.text, completed: nextCompleted })
+        }
       }
 
   const handleToggle = isControlled
     ? onToggle
     : (todo: Todo) => {
-        const index = allTodos.indexOf(todo)
-        previewActions.updateAt(index, { text: todo.text, completed: !todo.completed })
+        previewActions.set(todo.id, { text: todo.text, completed: !todo.completed })
       }
 
   const handleDestroy = isControlled
     ? onDestroy
-    : (index: number) => {
-        previewActions.removeAt(index)
+    : (id: string) => {
+        previewActions.remove(id)
       }
 
   if (previewLoading && !isControlled) {
@@ -145,24 +146,21 @@ export default function TodoList({
       <label htmlFor="toggle-all">Mark all as complete</label>
 
       <ul className="todo-list">
-        {visibleTodos.map(todo => {
-          const index = allTodos.indexOf(todo)
-          return (
-            <TodoItem
-              key={index}
-              todo={todo}
-              index={index}
-              isEditing={editingIndex === index}
-              editText={editingIndex === index ? editText : todo.text}
-              onToggle={handleToggle}
-              onDestroy={handleDestroy}
-              onStartEditing={onStartEditing}
-              onEditTextChange={onEditTextChange}
-              onSubmitEdit={onSubmitEdit}
-              onCancelEdit={onCancelEdit}
-            />
-          )
-        })}
+        {visibleTodos.map(todo => (
+          <TodoItem
+            key={todo.id}
+            todo={todo}
+            id={todo.id}
+            isEditing={editingId === todo.id}
+            editText={editingId === todo.id ? editText : todo.text}
+            onToggle={handleToggle}
+            onDestroy={handleDestroy}
+            onStartEditing={onStartEditing}
+            onEditTextChange={onEditTextChange}
+            onSubmitEdit={onSubmitEdit}
+            onCancelEdit={onCancelEdit}
+          />
+        ))}
       </ul>
     </section>
   )
