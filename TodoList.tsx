@@ -74,7 +74,10 @@ export default function TodoList({
     ;(async () => {
       try {
         for (const sample of SAMPLE_TODOS) {
-          await previewActions.set(Date.now().toString(), { text: sample.text, completed: sample.completed })
+          await previewActions.set(Date.now().toString(), {
+            text: sample.text,
+            completed: sample.completed,
+          })
         }
         setPreviewSeeded(true)
       } finally {
